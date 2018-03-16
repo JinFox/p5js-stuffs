@@ -6,6 +6,17 @@
 var brain;
 var m;
 var m2;
+
+
+let training_data = [
+  {inputs:[0,0], targets:[0]},
+  {inputs:[0,1], targets:[1]},
+  {inputs:[1,0], targets:[1]},
+  {inputs:[1,1], targets:[0]}
+]
+
+
+
 function setup() {
 	//createCanvas(800, 600);
 	//pixelDensity(1);
@@ -22,11 +33,16 @@ function setup() {
   // Matrix.transpose(a).print();
 
   let nn = new NeuralNetwork(2,2,1);
-  let input = [1, 0];
+  
+  for (let i = 0; i < 100000; i++) {
+    let data = random(training_data);
+    nn.train(data.inputs, data.targets);  
+  }
 
-  let output = nn.feedForward(input);
-
-  console.log(output);
+  console.log(nn.feedForward([0,0]));
+  console.log(nn.feedForward([0,1]));
+  console.log(nn.feedForward([1,0]));
+  console.log(nn.feedForward([1,1]));
 }
 
 function draw() {

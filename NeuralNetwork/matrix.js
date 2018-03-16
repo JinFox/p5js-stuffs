@@ -34,8 +34,14 @@ class Matrix{
     return m;
   }
 
+  
+  /**
+   * Creates a Matrix with arr.length lines and 1 Column
+   * @param  {} arr The Array to convert
+   */
   static fromArray(arr) {
-    return new Matrix(arr.length, 1).map((elem, i) => arr[i]);
+    let m = new Matrix(arr.length, 1).map((elem, i) => arr[i]);
+    return m;
   }
   
   toArray() {
@@ -56,7 +62,7 @@ class Matrix{
 
     // Return a new Matrix a-b
     return new Matrix(a.rows, a.cols)
-      .map((_, i, j) => a.data[i][j] - b.data[i][j]);
+      .map((elem, i, j) => a.data[i][j] - b.data[i][j]);
   }
 
 
@@ -93,7 +99,7 @@ class Matrix{
     {
       for (let j = 0; j < this.cols; j++)
       {
-        this.data[i][j] = func(this.data[i][j]);
+        this.data[i][j] = func(this.data[i][j], i, j);
       }
     }
     return this; // for linked call 
@@ -117,11 +123,11 @@ class Matrix{
   }
 
   randomize(min = -1.0, max = 1.0) {
-    return this.map(e => {Math.random() * (max - min) + min;});
+    return this.map(e => Math.random() * (max - min) + min);
   }
 
   static transpose(n) {
-    return new Matrix(matrix.cols, matrix.rows).map((_, i, j) => matrix.data[j][i]);
+    return new Matrix(n.cols, n.rows).map((_, i, j) => n.data[j][i]);
   }
 
   
@@ -146,7 +152,7 @@ class Matrix{
         return ;
       }
 
-      return new Matrix(a.rows, b.cols).map((elem, i, j) => {
+      return new Matrix(m1.rows, m2.cols).map((elem, i, j) => {
         let sum = 0;
         for (let k = 0; k < m1.cols; k++) {
           sum += m1.data[i][k] * m2.data[k][j];
@@ -154,18 +160,6 @@ class Matrix{
         return sum;
       });
 
-      /* old
-      for (let i = 0; i< result.rows ; i++) {
-        for (let j = 0; j < result.cols ; j++) {
-          let sum = 0;
-          for (let k = 0; k < m1.rows; k++) {
-            sum += m1.data[i][k] * m2.data[k][j];
-          }
-          result.data[i][j] = sum;
-        }
-      }
-      return result;
-      */
   }
 
   serialize() {
