@@ -26,11 +26,8 @@ class Matrix{
   
   copy() {
     let m = new Matrix(this.rows, this.cols);
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.cols; j++) {
-        m.data[i][j] = this.data[i][j];
-      }
-    }
+    m.map((elem, i, j) => this.data[i][j]);
+    
     return m;
   }
 
@@ -73,7 +70,7 @@ class Matrix{
       this.data = [];
       for (let i = 0; i< this.rows ; i++)
       {
-        this.data[i] = []
+        this.data[i] = [];
         for (let j = 0; j < this.cols ; j++)
         {
           this.data[i][j] = n.data[i][j];
@@ -95,10 +92,8 @@ class Matrix{
     */
    map(func)
    {
-    for (let i = 0; i < this.rows; i++)
-    {
-      for (let j = 0; j < this.cols; j++)
-      {
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.cols; j++) {
         this.data[i][j] = func(this.data[i][j], i, j);
       }
     }

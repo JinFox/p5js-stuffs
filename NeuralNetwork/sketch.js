@@ -3,10 +3,6 @@
 * @Last modified time: 2017-11-16T15:47:44+00:00
 */
 
-var brain;
-var m;
-var m2;
-
 
 let training_data = [
   {inputs:[0,0], targets:[0]},
@@ -23,7 +19,9 @@ function setup() {
   colorMode(RGB, 255, 255, 255);
   background(0, 0, 0);
 
-	
+  let m1 = new Matrix(3,3);
+  m1.randomize();
+  
   
   nn = new NeuralNetwork(2,6,1);
   lr_slider = createSlider(0.01, 0.5, 0.1, 0.01);

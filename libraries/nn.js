@@ -8,27 +8,52 @@
 
 class NeuralNetwork {
   // TODO: MULTI HIDDEN LAYER 
-  constructor(input_nb, hidden_nb, output_nb)
+  constructor(a, b, c)
   {
-    this.input_nodes = input_nb;
-    this.hidden_nodes = hidden_nb;
-    this.output_nodes = output_nb;
+    if (a instanceof NeuralNetwork)
+    {
+      this.input_nodes = a.input_nodes;
+      this.hidden_nodes = a.hidden_nodes;
+      this.output_nodes = a.output_nodes;
+      
+      this.weights_ih = a.weights_ih.copy();
+      this.weights_ho = a.weights_ho.copy();
+
+      this.bias_h = a.bias_h.copy();
+      this.bias_o = a.bias_o.copy();
+
+      this.setActivationFunction(a.activation_function);
+      this.setLearningRate(a.learning_rate);
+    } else {
+      this.input_nodes = a;
+      this.hidden_nodes = b;
+      this.output_nodes = c;
+      
+      this.weights_ih = new Matrix(this.hidden_nodes, this.input_nodes);
+      this.weights_ho = new Matrix(this.output_nodes, this.hidden_nodes);
+
+      this.weights_ih.randomize();
+      this.weights_ho.randomize();
+
+      this.bias_h = new Matrix(this.hidden_nodes, 1);
+      this.bias_o = new Matrix(this.output_nodes, 1);
+
+      this.bias_h.randomize();
+      this.bias_o.randomize();
+      this.setActivationFunction();
+      this.setLearningRate();
+    }
     
-    this.weights_ih = new Matrix(this.hidden_nodes, this.input_nodes);
-    this.weights_ho = new Matrix(this.output_nodes, this.hidden_nodes);
-
-    this.weights_ih.randomize();
-    this.weights_ho.randomize();
-
-    this.bias_h = new Matrix(this.hidden_nodes, 1);
-    this.bias_o = new Matrix(this.output_nodes, 1);
-
-    this.bias_h.randomize();
-    this.bias_o.randomize();
-
-    this.setActivationFunction();
-    this.setLearningRate();
   }
+  computeLayer(inputs, weights, bias) {
+    // Apply weights to the inputs
+    let layer = Matrix.multiply(weights, inputs);
+    // Apply the bias
+    layer.add(bias);
+    layer.map(this.activation_function.func);
+    return layer;
+  }
+
   
   /**
    * @param  {Array} inputs 
@@ -36,16 +61,9 @@ class NeuralNetwork {
    */
   predict(inputs) {
     // Compute hidden layer using inputs and weight Matrix
-    let hidden = Matrix.multiply(this.weights_ih, Matrix.fromArray(inputs));
-    hidden.add(this.bias_h);
-    // Activation function
-    hidden.map(this.activation_function.func);
-
+    let hidden = this.computeLayer(inputs, this.weights_ih, this.bias_h);
     // Generating the output
-    let output = Matrix.multiply(this.weights_ho, hidden);
-    output.add(this.bias_o);
-    output.map(this.activation_function.func);
-   
+    let outputs = this.computeLayer(hidden, this.weights_ho, this.bias_o);
     return output.toArray();
   }
 
@@ -55,18 +73,14 @@ class NeuralNetwork {
    * @param  {Array} targets The expected answer
    */
   train(inputs, targets) {
-    // Compute hidden layer using inputs and weight Matrix
-    let hidden = Matrix.multiply(this.weights_ih, Matrix.fromArray(inputs));
-    hidden.add(this.bias_h);
-    hidden.map(this.activation_function.func);
-
-    // Generating the output
-    let outputs = Matrix.multiply(this.weights_ho, hidden);
-    outputs.add(this.bias_o);
-    outputs.map(this.activation_function.func);
-
     inputs = Matrix.fromArray(inputs);
     targets = Matrix.fromArray(targets);
+
+    // Compute hidden layer using inputs and weight Matrix
+    let hidden = this.computeLayer(inputs, this.weights_ih, this.bias_h);
+
+    // Generating the output
+    let outputs = this.computeLayer(hidden, this.weights_ho, this.bias_o);
 
     // Calculate the error
     let output_errors = Matrix.subtract(targets, outputs);
@@ -80,10 +94,10 @@ class NeuralNetwork {
     let hidden_errors = Matrix.multiply(who_t, output_errors);
     
     this.trainLayer(inputs, hidden, hidden_errors, this.weights_ih, this.bias_h);
-    
-    
 
   }
+  
+  
   trainLayer(input, out, error, weights, bias) {
     // Calculate the gradient
     let gradients = Matrix.map(out, this.activation_function.dfunc);
