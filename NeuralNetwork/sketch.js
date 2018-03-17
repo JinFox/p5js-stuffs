@@ -15,36 +15,41 @@ let training_data = [
   {inputs:[1,1], targets:[0]}
 ]
 
-
-
+var nn;
+var lr_slider;
 function setup() {
-	//createCanvas(800, 600);
-	//pixelDensity(1);
-  //colorMode(RGB, 255, 255, 255);
-  //background(42, 221, 21);
+	createCanvas(400, 400);
+	pixelDensity(1);
+  colorMode(RGB, 255, 255, 255);
+  background(0, 0, 0);
 
 	
-  // let a = new Matrix(2, 3).randomize();
-  // let b = new Matrix(3, 2).randomize();
-  // a.print();
-  // b.print();
-  // let c = Matrix.multiply(a, b);
-  // c.print();
-  // Matrix.transpose(a).print();
-
-  let nn = new NeuralNetwork(2,2,1);
   
-  for (let i = 0; i < 100000; i++) {
-    let data = random(training_data);
-    nn.train(data.inputs, data.targets);  
-  }
-
-  console.log(nn.feedForward([0,0]));
-  console.log(nn.feedForward([0,1]));
-  console.log(nn.feedForward([1,0]));
-  console.log(nn.feedForward([1,1]));
+  nn = new NeuralNetwork(2,6,1);
+  lr_slider = createSlider(0.01, 0.5, 0.1, 0.01);
 }
 
 function draw() {
+  background(0);
+  noStroke();
+  for (let i = 0; i < 50; i++) {
+    let data = random(training_data);
+    nn.train(data.inputs, data.targets);  
+  }
+  nn.setLearningRate(lr_slider.value());
+  let resolution = 10;
+  let cols = width / resolution;
+  let rows = height / resolution;
+  
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      let x1 = i / cols;
+      let x2 = j / rows;
+      let inputs = [x1, x2];
+      let y = nn.predict(inputs);
 
+      fill(y * 255);
+      rect(i * resolution, j * resolution, resolution, resolution);
+    }
+  }
 }
