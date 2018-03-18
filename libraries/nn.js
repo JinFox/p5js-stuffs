@@ -77,17 +77,24 @@ class NeuralNetwork {
   //   let outputs = this.computeLayer(hidden, this.weights_ho, this.bias_o);
   //   return outputs.toArray();
   // }
-  predict(inputs) {
+  predict(inputs, layer_results) {
     // Compute hidden layer using inputs and weight Matrix
+    if (layer_results)
+      layer_results.push(inputs);
     let previous_hidden = Matrix.fromArray(inputs);
     for (let i = 0; i < this.weights_h.length; i++) {
       let current = this.computeLayer(previous_hidden, this.weights_h[i], this.bias_h[i]);
+      if (layer_results)
+        layer_results.push(current.toArray());
       previous_hidden = current;
     }
 
     // Generating the output
     let outputs = this.computeLayer(previous_hidden, this.weights_ho, this.bias_o);
-    return outputs.toArray();
+    let guess = outputs.toArray();
+    if (layer_results)
+      layer_results.push(guess);
+    return guess;
   }
 
   /**
