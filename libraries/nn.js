@@ -30,6 +30,7 @@ class NeuralNetwork {
       this.output_nodes = c;
       
       this.weights_ih = new Matrix(this.hidden_nodes, this.input_nodes);
+
       this.weights_ho = new Matrix(this.output_nodes, this.hidden_nodes);
 
       this.weights_ih.randomize();
@@ -49,6 +50,8 @@ class NeuralNetwork {
     // Apply weights to the inputs
     let layer = Matrix.multiply(weights, inputs);
     // Apply the bias
+    if (bias == undefined)
+      console.log("undefined");
     layer.add(bias);
     layer.map(this.activation_function.func);
     return layer;
@@ -61,10 +64,10 @@ class NeuralNetwork {
    */
   predict(inputs) {
     // Compute hidden layer using inputs and weight Matrix
-    let hidden = this.computeLayer(inputs, this.weights_ih, this.bias_h);
+    let hidden = this.computeLayer(Matrix.fromArray(inputs), this.weights_ih, this.bias_h);
     // Generating the output
     let outputs = this.computeLayer(hidden, this.weights_ho, this.bias_o);
-    return output.toArray();
+    return outputs.toArray();
   }
 
   /**
