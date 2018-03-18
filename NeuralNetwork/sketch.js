@@ -22,7 +22,7 @@ function setup() {
   let m1 = new Matrix(3,3);
   m1.randomize();
   
-  nn = new NeuralNetwork(2,[4, 3, 4, 2],1);
+  nn = new NeuralNetwork(2,[4, 25],1);
   lr_slider = createSlider(0.01, 0.5, 0.1, 0.01);
   console.table(nn.predict([0,0]));
   
@@ -40,7 +40,7 @@ function draw() {
   
   
   // show prediction graph
-  //showPredictGraph();
+  showPredictGraph();
   let input = [1,0];
   let layers_result= [];
   let output = nn.predict(input, layers_result);
