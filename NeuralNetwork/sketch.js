@@ -23,14 +23,16 @@ function setup() {
   m1.randomize();
   
   
-  nn = new NeuralNetwork(2,6,1);
+  nn = new NeuralNetwork(2,[2,6,2],1);
   lr_slider = createSlider(0.01, 0.5, 0.1, 0.01);
+  console.table(nn.predict([0,0]));
+  
 }
 
 function draw() {
   background(0);
   noStroke();
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 5000; i++) {
     let data = random(training_data);
     nn.train(data.inputs, data.targets);  
   }

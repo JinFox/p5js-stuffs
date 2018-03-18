@@ -26,26 +26,36 @@ class NeuralNetwork {
       this.setLearningRate(a.learning_rate);
     } else {
       this.input_nodes = a;
-      this.hidden_nodes = b;
+      if (Array.isArray(b))
+        this.hidden_nodes = b;
+      else
+        this.hidden_nodes = [b];
       this.output_nodes = c;
       
-      this.weights_ih = new Matrix(this.hidden_nodes, this.input_nodes);
+      this.weights_h = [];
+      this.bias_h = [];
 
-      this.weights_ho = new Matrix(this.output_nodes, this.hidden_nodes);
+      let previous_node_nb = this.input_nodes;
+      for (let i = 0; i< this.hidden_nodes.length; i++) {
+        
+        this.weights_h[i] = new Matrix(this.hidden_nodes[i], previous_node_nb).randomize();
+        this.bias_h[i] = new Matrix(this.hidden_nodes[i], 1).randomize();
 
-      this.weights_ih.randomize();
+        previous_node_nb = this.hidden_nodes[i];
+      }
+      
+      //output nodes
+      this.weights_ho = new Matrix(this.output_nodes, previous_node_nb);
       this.weights_ho.randomize();
-
-      this.bias_h = new Matrix(this.hidden_nodes, 1);
       this.bias_o = new Matrix(this.output_nodes, 1);
-
-      this.bias_h.randomize();
       this.bias_o.randomize();
+      
       this.setActivationFunction();
       this.setLearningRate();
     }
     
   }
+
   computeLayer(inputs, weights, bias) {
     // Apply weights to the inputs
     let layer = Matrix.multiply(weights, inputs);
@@ -62,11 +72,23 @@ class NeuralNetwork {
    * @param  {Array} inputs 
    * @returns {Array} output of the Neural network
    */
+  // predict(inputs) {
+  //   // Compute hidden layer using inputs and weight Matrix
+  //   let hidden = this.computeLayer(Matrix.fromArray(inputs), this.weights_ih, this.bias_h);
+  //   // Generating the output
+  //   let outputs = this.computeLayer(hidden, this.weights_ho, this.bias_o);
+  //   return outputs.toArray();
+  // }
   predict(inputs) {
     // Compute hidden layer using inputs and weight Matrix
-    let hidden = this.computeLayer(Matrix.fromArray(inputs), this.weights_ih, this.bias_h);
+    let previous_hidden = Matrix.fromArray(inputs);
+    for (let i = 0; i < this.weights_h.length; i++) {
+      let current = this.computeLayer(previous_hidden, this.weights_h[i], this.bias_h[i]);
+      previous_hidden = current;
+    }
+
     // Generating the output
-    let outputs = this.computeLayer(hidden, this.weights_ho, this.bias_o);
+    let outputs = this.computeLayer(previous_hidden, this.weights_ho, this.bias_o);
     return outputs.toArray();
   }
 
@@ -75,29 +97,68 @@ class NeuralNetwork {
    * @param  {Array} inputs
    * @param  {Array} targets The expected answer
    */
+  // train(inputs, targets) {
+  //   inputs = Matrix.fromArray(inputs);
+  //   targets = Matrix.fromArray(targets);
+
+  //   // Compute hidden layer using inputs and weight Matrix
+  //   let hidden = this.computeLayer(inputs, this.weights_ih, this.bias_h);
+
+  //   // Generating the output
+  //   let outputs = this.computeLayer(hidden, this.weights_ho, this.bias_o);
+
+  //   // Calculate the error
+  //   let output_errors = Matrix.subtract(targets, outputs);
+  //   this.trainLayer(hidden, outputs, output_errors, this.weights_ho, this.bias_o);
+    
+  //   /////////////////////////////////////////////////////////////
+
+  //   // Calculate hidden layer errors 
+  //   // Get ponderated errors for hidden layer using transposed weights and output layer errors
+  //   let who_t = Matrix.transpose(this.weights_ho);
+  //   let hidden_errors = Matrix.multiply(who_t, output_errors);
+    
+  //   this.trainLayer(inputs, hidden, hidden_errors, this.weights_ih, this.bias_h);
+
+  // }
+
   train(inputs, targets) {
     inputs = Matrix.fromArray(inputs);
     targets = Matrix.fromArray(targets);
 
-    // Compute hidden layer using inputs and weight Matrix
-    let hidden = this.computeLayer(inputs, this.weights_ih, this.bias_h);
+    let previous_hidden = inputs;
+    let hiddens = [];
+    for (let i = 0; i < this.weights_h.length; i++) {
+      hiddens[i] = this.computeLayer(previous_hidden, this.weights_h[i], this.bias_h[i]);
+      previous_hidden = hiddens[i];
+    }
 
     // Generating the output
-    let outputs = this.computeLayer(hidden, this.weights_ho, this.bias_o);
+    let outputs = this.computeLayer(previous_hidden, this.weights_ho, this.bias_o);
 
-    // Calculate the error
+    // Calculate the error for the output
     let output_errors = Matrix.subtract(targets, outputs);
-    this.trainLayer(hidden, outputs, output_errors, this.weights_ho, this.bias_o);
+    this.trainLayer(previous_hidden, outputs, output_errors, this.weights_ho, this.bias_o);
     
     /////////////////////////////////////////////////////////////
 
     // Calculate hidden layer errors 
     // Get ponderated errors for hidden layer using transposed weights and output layer errors
-    let who_t = Matrix.transpose(this.weights_ho);
-    let hidden_errors = Matrix.multiply(who_t, output_errors);
-    
-    this.trainLayer(inputs, hidden, hidden_errors, this.weights_ih, this.bias_h);
+    let previous_error = output_errors;
+    let previous_weights = this.weights_ho;
 
+    /*let who_t = Matrix.transpose(previous_weights);
+    let hidden_errors = Matrix.multiply(who_t, previous_error);
+    
+     this.trainLayer(inputs, hiddens[0], hidden_errors, this.weights_h[0], this.bias_h[0]);
+*/
+    for (let i = this.weights_h.length - 1; i >= 0; --i) {
+      let current_input = (i >= 1 ?  hiddens[i-1] : inputs);
+      let weigths_T = Matrix.transpose(previous_weights);
+      let hidden_errors = Matrix.multiply(weigths_T, previous_error);
+      this.trainLayer(current_input, hiddens[i], hidden_errors, this.weights_h[i], this.bias_h[i]);
+      previous_error = hidden_errors;
+   }
   }
   
   
