@@ -15,7 +15,7 @@ function setup() {
 	createCanvas(600, 600);
 	pixelDensity(1);
 //	frameRate(3);
-  colorMode(RGB, 255, 255, 255);
+  colorMode(HSB, 255, 255, 255);
 
 	w = floor(width / cols);
 	h = floor(height / rows);
@@ -30,16 +30,18 @@ function setup() {
 }
 
 var current;
+var depth = 0;
+var maxDepth = 0;
 function draw() {
 	background(55, 55, 55);
 
 	for (var i = 0; i < cells.length; i++) {
-		cells[i].show();
+		cells[i].show(maxDepth);
 	}
 	current.visited = true;
-	current.highlight(color(0, 255, 0, 200));
+	current.highlight(color(120, 255, 150, 200));
 	for (var i = 0; i < cellStack.length; i++) {
-		cellStack[i].highlight(color(0, 0, 255));
+		cellStack[i].highlight(color(180, 200, 150));
 	}
 	//STEP 1
 	var next = current.getNeighbor();
@@ -48,7 +50,9 @@ function draw() {
 		next.visited = true;
 		//STEP 2
 		cellStack.push(current);
-
+		current.setDepth(depth);
+		depth++;
+		maxDepth = maxDepth < depth ? depth : maxDepth;
 		//STEP 3
 		removeWall(current, next);
 
@@ -57,7 +61,9 @@ function draw() {
 	}
 	else if (cellStack.length > 0){
 		//STEP 4
+		current.setDepth(depth);
 		current = cellStack.pop();
+		depth--;
 	}
 	else {
 		console.log("Finished");

@@ -12,16 +12,23 @@ function Cell(i, j)
   this.visited = false;
 
   this.walls = [true, true, true, true];
-
-  this.show = function()
+  this.depth = 0;
+  this.setDepth = function(depth) {
+	  this.depth = depth;
+  }
+  this.show = function(maxDepth)
   {
     var x = this.i*w;
     var y = this.j*h;
     if (this.visited)
       {
         noStroke();
-        fill(200, 0, 200, 200);
-        rect(x, y, w, h);
+		var col = this.depth ? this.depth/maxDepth * 255 : 0;
+        fill(col, 200, 200, 255);
+		rect(x, y, w, h);
+		fill(255);
+		text(this.depth, x + w/3,y + h/2);
+        
       }
 
     stroke(255);
